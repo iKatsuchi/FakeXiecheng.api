@@ -1,2 +1,2 @@
-# SQLserver user:sa
-# password: Sql@123456
+### SQLserver user:sa
+### password: Sql@123456
