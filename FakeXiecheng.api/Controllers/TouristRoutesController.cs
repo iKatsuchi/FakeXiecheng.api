@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using System.Net.Http.Headers;
 
 namespace FakeXiecheng.api.Controllers
 {
@@ -80,9 +81,13 @@ namespace FakeXiecheng.api.Controllers
         [HttpGet(Name = "GetTouristRoutesAsync")]
         [HttpHead]
         //写了    [ApiController]就可以省略[FromQuery]此处为了说明问题特别标明
+        // application/vnd._{公司名称}.hateoas+json
+        // 1、 application/json 旅游路线资源
+        // 2、 application/vnd.xxx.hateoas+json 附加超链接
         public async Task<IActionResult> GetTouristRoutesAsync(
             [FromQuery] TouristRouteResourceParameters parameters,
-            [FromQuery] PaginationResourceParamaters parameter2
+            [FromQuery] PaginationResourceParamaters parameter2,
+            [FromHeader(Name ="Accept")] string mediaType
             //[FromQuery] string keyword
             //string rating //小于lessThan, 大于lagerThan,等于equalTo lessThan3,largeThan2
             )
@@ -96,6 +101,11 @@ namespace FakeXiecheng.api.Controllers
             //    operatorType = match.Groups[1].Value;
             //    ratingValue = int.Parse(match.Groups[2].Value);
             //}
+
+            if(!MediaTypeHeaderValue.TryParse(mediaType,out MediaTypeHeaderValue parsedMediatype))
+            {
+                return BadRequest();
+            }
 
             if(!_propertyMappingService
                 .IsMappingExists<TouristRouteDto,TouristRoute>(
@@ -146,7 +156,51 @@ namespace FakeXiecheng.api.Controllers
             Response.Headers.Add("x-pagination",
                 Newtonsoft.Json.JsonConvert.SerializeObject(paginationMetadata));
 
-            return Ok(touristRoutesDto.ShapeData(parameters.Fields));
+            var shapeDtoList = touristRoutesDto.ShapeData(parameters.Fields);
+
+            if(parsedMediatype.MediaType == "application/vnd.xxx.haseoas+json")
+            {
+                var linkDto = CreateLinksForTouristRouteList(parameters, parameter2);
+
+                var shapedDtoWithLinklist = shapeDtoList.Select(t =>
+                {
+                    var touristRouteDictionary = t as IDictionary<string, object>;
+                    var links = CreateLinkForTouristRoute(
+                        (Guid)touristRouteDictionary["Id"], null);
+                    touristRouteDictionary.Add("links", links);
+
+                    return touristRouteDictionary;
+                });
+
+                var result = new
+                {
+                    value = shapedDtoWithLinklist,
+                    links = linkDto
+                };
+
+                return Ok(result);
+            }
+
+            return Ok(shapeDtoList);
+        }
+
+        private IEnumerable<LinkDto> CreateLinksForTouristRouteList(
+            TouristRouteResourceParameters parameters,
+            PaginationResourceParamaters parameter2)
+        {
+            var links = new List<LinkDto>();
+            //添加self，自我链接
+            links.Add(new LinkDto(
+                GenerateTouristRouteResourceURL(parameters, parameter2, ResourceUrlType.CurrentPage),
+                "self",
+                "Get"
+                ));
+            links.Add(new LinkDto(
+                Url.Link("CreateTouristRoute", null),
+                "create_tourist_route",
+                "POST"
+                ));
+            return links;
         }
 
         [HttpGet("{touristRouteId}", Name = "GetTouristRouteById")]
@@ -223,7 +277,7 @@ namespace FakeXiecheng.api.Controllers
             return links;
         }
 
-        [HttpPost]
+        [HttpPost(Name = "CreateTouristRoute")]
         [Authorize(AuthenticationSchemes = "Bearer")]
         [Authorize(Roles ="Admin")]
         //[Authorize]
@@ -233,9 +287,17 @@ namespace FakeXiecheng.api.Controllers
             _touristRouteRepository.AddTouristRoute(touristRouteModel);
             await _touristRouteRepository.SaveAsync();
             var touristRouteToReturn = _mapper.Map<TouristRouteDto>(touristRouteModel);
+
+            var links = CreateLinkForTouristRoute(touristRouteModel.Id, null);
+
+            var result = touristRouteToReturn.ShapeData(null)
+                as IDictionary<string, object>;
+
+            result.Add("links", links);
+
             return CreatedAtRoute("GetTouristRouteById",
-                new { touristRouteId = touristRouteToReturn.Id },
-                touristRouteToReturn);
+                new { touristRouteId = result["Id"] },
+                result);
         }
 
         [HttpPut("{touristRouteId}", Name = "UpdateTouristRoute")]

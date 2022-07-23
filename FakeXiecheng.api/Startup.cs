@@ -17,6 +17,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Identity;
 using FakeXiecheng.api.Models;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using System.Linq;
+using Microsoft.AspNetCore.Mvc.Formatters;
 
 namespace FakeXiecheng.api
 {
@@ -96,6 +98,17 @@ namespace FakeXiecheng.api
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
 
             services.AddTransient<IPropertyMappingService, PropertyMappingService>();
+
+            //添加自定义媒体类型
+            services.Configure<MvcOptions>(config =>
+            {
+                var outputFormatter = config.OutputFormatters.OfType<NewtonsoftJsonOutputFormatter>()?.FirstOrDefault();
+                if (outputFormatter != null)
+                {
+                    outputFormatter.SupportedMediaTypes
+                    .Add("application/vnd.xxx.hateoas+json");
+                }
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

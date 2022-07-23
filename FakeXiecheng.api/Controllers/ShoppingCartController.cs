@@ -30,7 +30,7 @@ namespace FakeXiecheng.api.Controllers
             _mapper = mapper;
         }
 
-        [HttpGet]
+        [HttpGet(Name = "GetShoppingCart")]
         [Authorize]
         public async Task<IActionResult> GetShoppingCartAsync()
         {
