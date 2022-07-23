@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Migrations\20220715104923_touristJson.cs" />
+    <Compile Remove="Migrations\20220715104923_touristJson.Designer.cs" />
+    <Compile Remove="Migrations\20220715105444_JsonData.cs" />
+    <Compile Remove="Migrations\20220715105444_JsonData.Designer.cs" />
+    <Compile Remove="Migrations\20220715105514_JsonData.cs" />
+    <Compile Remove="Migrations\20220715105514_JsonData.Designer.cs" />
+    <Compile Remove="Migrations\20220715110018_JsonData.cs" />
+    <Compile Remove="Migrations\20220715110018_JsonData.Designer.cs" />
+    <Compile Remove="Migrations\20220715110420_fisrtInsertData.cs" />
+    <Compile Remove="Migrations\20220715110420_fisrtInsertData.Designer.cs" />
+    <Compile Remove="Migrations\20220715110810_InsertData.cs" />
+    <Compile Remove="Migrations\20220715110810_InsertData.Designer.cs" />
+    <Compile Remove="Migrations\20220715111431_inital.cs" />
+    <Compile Remove="Migrations\20220715111431_inital.Designer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="7.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.27" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.1.27" />
+    <PackageReference Include="Microsoft.AspNetCore.JsonPatch" Version="3.1.27" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.27" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.27" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.27" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.27">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="stateless" Version="5.1.2" />
+    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.1.7" />
+  </ItemGroup>
+
+
+</Project>
